@@ -41,6 +41,9 @@ dependencies {
    mavenInternal(project(Projects.Framework.discovery))
    mavenInternal(project(Projects.Framework.engine))
    mavenInternal(project(Projects.JunitRunner))
+   mavenInternal(project(Projects.JunitRunner))
+   mavenInternal(project(":kotest-framework:kotest-framework-multiplatform-plugin-legacy-native"))
+   mavenInternal(project(":kotest-framework:kotest-framework-multiplatform-plugin-embeddable-compiler"))
 }
 
 
@@ -99,12 +102,6 @@ sourceSets.main {
 }
 
 
-tasks.clean {
-   delete("$projectDir/test-project/build/")
-   delete("$projectDir/test-project/.gradle/")
-}
-
-
 @Suppress("UnstableApiUsage") // jvm test suites are incubating
 testing.suites {
    val test by getting(JvmTestSuite::class) {
@@ -139,7 +136,6 @@ testing.suites {
             dependsOn(installMavenInternal)
             systemProperties(
                "mavenInternalDir" to file(mavenInternalDir).canonicalPath,
-               "kotestVersion" to Ci.publishVersion,
             )
          }
       }
@@ -170,6 +166,7 @@ val services = objects.newInstance(Services::class)
 
 
 val installMavenInternal by tasks.registering {
+   description = "Collect zipped 'maven-internal' directories, and unzip them into the local build directory"
    dependsOn(mavenInternal)
    group = LifecycleBasePlugin.BUILD_GROUP
 

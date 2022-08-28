@@ -7,8 +7,11 @@ import io.kotest.core.spec.style.scopes.FunSpecContainerScope
 import io.kotest.framework.multiplatform.gradle.util.GradleKtsProjectTest
 import io.kotest.framework.multiplatform.gradle.util.GradleKtsProjectTest.Companion.gradleKtsProjectTest
 import io.kotest.framework.multiplatform.gradle.util.GradleProjectTest
+import io.kotest.matchers.file.shouldBeAFile
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldContainInOrder
 import io.kotest.matchers.string.shouldNotContain
 import org.gradle.testkit.runner.TaskOutcome
 
@@ -46,11 +49,11 @@ class KotestPluginSpec : FunSpec({
                      mavenInternalDir = mavenInternalDir,
                      nativeMemoryModel = nativeMemoryModel
                   )
-//            val useNewNativeMemoryModel = true
 
                   `verify Gradle can configure the project`(gradleTestProject)
                   `verify Kotest plugin warnings`(gradleTestProject)
                   `run test task`(gradleTestProject, nativeTargetTest)
+                  `test report should contain 2 successful tests`(gradleTestProject, nativeTargetTest)
                }
             }
          }
@@ -109,6 +112,15 @@ kotlin {
             implementation("io.kotest:kotest-runner-junit5:$kotestVersion")
          }
       }
+   }
+}
+
+tasks.withType<AbstractTestTask>().configureEach {
+   testLogging {
+      showExceptions = true
+      showStandardStreams = true
+      events = setOf(TestLogEvent.FAILED, TestLogEvent.SKIPPED, TestLogEvent.STANDARD_ERROR, TestLogEvent.STANDARD_OUT)
+      exceptionFormat = TestExceptionFormat.FULL
    }
 }
 
@@ -214,11 +226,46 @@ class TestSpec : ShouldSpec({
                .build()
 
             result.output.asClue {
-               test("expect task :$testTask is successful") {
+               test("expect task $testTask is successful") {
                   result.output shouldContain "BUILD SUCCESSFUL"
-                  result.task(testTask)?.outcome shouldBe TaskOutcome.SUCCESS
+                  val taskResult = result.task(testTask)
+                  taskResult.shouldNotBeNull()
+                  taskResult.outcome shouldBe TaskOutcome.SUCCESS
+//                  taskResult.outcome.shouldNotBeOneOf(
+//                     TaskOutcome.FAILED,
+//                     TaskOutcome.NO_SOURCE,
+//                  )
                }
             }
+         }
+      }
+
+      private suspend fun FunSpecContainerScope.`test report should contain 2 successful tests`(
+         gradleTestProject: GradleProjectTest,
+         testTask: String,
+      ) {
+         gradleTestProject.projectDir.resolve("build/test-results")
+            .walk()
+            .filter { it.isFile }
+            .forEach {
+               println("report available for ${testCase.name.testName} ${it.canonicalPath}")
+            }
+
+         val testReportFile = gradleTestProject.projectDir
+            .resolve("build/test-results/${testTask.removePrefix(":")}/TEST-TestSpec.xml")
+            .canonicalFile
+
+         context("verify task $testTask has successful report $testReportFile") {
+
+
+            testReportFile.shouldBeAFile()
+
+            val testReportContents: String = testReportFile.readText()
+
+            testReportContents.shouldContainInOrder(
+               """  <?xml version="1.0" encoding="UTF-8"?>                                    """.trim(),
+               """  <testsuite name="TestSpec" tests="2" skipped="0" failures="0" errors="0"  """.trim(),
+            )
          }
       }
    }

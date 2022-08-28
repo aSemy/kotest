@@ -41,7 +41,7 @@ class GradleKtsProjectTest(
    @Language("properties")
    var gradleProperties: String = """
         kotlin.mpp.stability.nowarn=true
-        org.gradle.cache=true
+        org.gradle.cache=false
    """.trimIndent()
 
    companion object {
