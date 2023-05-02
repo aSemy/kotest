@@ -6,9 +6,7 @@ plugins {
 }
 
 kotlin {
-   targets {
-      jvm()
-   }
+   jvm()
 }
 
 application {
@@ -32,6 +30,10 @@ tasks {
       finalizedBy(getByName("shadowJar"))
    }
 }
+
+tasks.startScripts { dependsOn(tasks.shadowJar) }
+tasks.distZip { dependsOn(tasks.shadowJar) }
+tasks.distTar { dependsOn(tasks.shadowJar) }
 
 dependencies {
    implementation(kotlin("reflect"))
