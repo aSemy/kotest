@@ -1,4 +1,3 @@
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
    alias(libs.plugins.kotlinBinaryCompatibilityValidator)
 }
@@ -6,7 +5,9 @@ plugins {
 repositories {
    mavenCentral()
    mavenLocal()
-   maven("https://oss.sonatype.org/content/repositories/snapshots/")
+   maven("https://oss.sonatype.org/content/repositories/snapshots/") {
+      mavenContent { snapshotsOnly() }
+   }
    google()
    gradlePluginPortal() // tvOS builds need to be able to fetch a kotlin gradle plugin
 }
