@@ -1,0 +1,71 @@
+name: Build Cache
+
+# Use GitHub Pages to share Gradle Build Cache
+
+on:
+   workflow_dispatch:
+   workflow_call:
+   push:
+      paths-ignore:
+         - 'doc/**'
+         - 'documentation/**'
+         - '*.md'
+         - '*.yml'
+         - '.github/workflows/**'
+      branches:
+         - master
+
+
+concurrency:
+   group: "gradle-build-cache"
+   cancel-in-progress: false
+
+
+jobs:
+
+   build:
+      runs-on: macos-latest
+      steps:
+         -  name: Checkout the repo
+            uses: actions/checkout@v3
+
+         -  name: Setup JDK
+            uses: actions/setup-java@v3
+            with:
+               distribution: temurin
+               java-version: 11
+
+         -  uses: gradle/gradle-build-action@v2
+            with:
+               gradle-home-cache-cleanup: true
+               arguments: >-
+                  jvmTest
+                  jsTest
+                  linuxX64Test
+                  macosX64Test
+                  macosArm64Test
+                  iosX64Test
+                  iosSimulatorArm64Test
+                  tvosX64Test
+                  watchosX86Test
+                  watchosX64Test
+                  watchosSimulatorArm64Test
+                  tvosSimulatorArm64Test
+
+         -  uses: actions/upload-pages-artifact@v1
+            with:
+               path: ~/.gradle/cache/build-cache-1
+
+   deploy:
+      needs: build
+      runs-on: ubuntu-latest
+      permissions:
+         pages: write      # to deploy to Pages
+         id-token: write   # to verify the deployment originates from an appropriate source
+      environment:
+         name: gradle-build-cache
+         url: ${{ steps.deployment.outputs.page_url }}
+      steps:
+         -  name: Deploy to GitHub Pages
+            id: deployment
+            uses: actions/deploy-pages@v1
