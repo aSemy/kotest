@@ -40,6 +40,7 @@ jobs:
                gradle-home-cache-cleanup: true
                arguments: >-
                   jvmTest
+                  -Dkotlin.incremental=false
 
 
 # jsTest
