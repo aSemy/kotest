@@ -111,3 +111,10 @@ gradleEnterprise {
 }
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
+buildCache {
+   remote<HttpBuildCache> {
+      url = uri("https://asemy.github.io/kotest/")
+      isPush = false
+   }
+}

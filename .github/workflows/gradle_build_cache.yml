@@ -24,7 +24,7 @@ concurrency:
 jobs:
 
    build:
-      runs-on: ubuntu-latest
+      runs-on: windows-latest
       steps:
          -  name: Checkout the repo
             uses: actions/checkout@v3
@@ -39,7 +39,7 @@ jobs:
             with:
                gradle-home-cache-cleanup: true
                arguments: >-
-                  jvmTest
+                  assemble
                   -Dkotlin.incremental=false
 
 
@@ -87,7 +87,7 @@ jobs:
          pages: write      # to deploy to Pages
          id-token: write   # to verify the deployment originates from an appropriate source
       environment:
-         name: gradle-build-cache
+         name: github-pages
          url: ${{ steps.deployment.outputs.page_url }}
       steps:
          -  name: Deploy to GitHub Pages
