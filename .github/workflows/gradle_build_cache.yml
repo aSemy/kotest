@@ -69,16 +69,16 @@ jobs:
                path: build-reports.zip
 
 
-         -  name: tree home
-            shell: bash
-            run: tree $HOME
-         -  name: tree home
-            shell: bash
-            run: tree ~
+#         -  name: tree home
+#            shell: bash
+#            run: tree $HOME
+#         -  name: tree home
+#            shell: bash
+#            run: tree ~
 
          -  uses: actions/upload-pages-artifact@v1
             with:
-               path: ~/.gradle/cache/build-cache-1
+               path: ~/.gradle/caches/build-cache-1
 
    deploy:
       needs: build
