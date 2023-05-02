@@ -78,7 +78,7 @@ jobs:
 
          -  uses: actions/upload-pages-artifact@v1
             with:
-               path: ~/.gradle/caches/build-cache-1
+               path: /home/runner/.gradle/caches/build-cache-1
 
    deploy:
       needs: build
