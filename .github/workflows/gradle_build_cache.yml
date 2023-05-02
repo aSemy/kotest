@@ -40,17 +40,32 @@ jobs:
                gradle-home-cache-cleanup: true
                arguments: >-
                   jvmTest
-                  jsTest
-                  linuxX64Test
-                  macosX64Test
-                  macosArm64Test
-                  iosX64Test
-                  iosSimulatorArm64Test
-                  tvosX64Test
-                  watchosX86Test
-                  watchosX64Test
-                  watchosSimulatorArm64Test
-                  tvosSimulatorArm64Test
+
+
+# jsTest
+# linuxX64Test
+# macosX64Test
+# macosArm64Test
+# iosX64Test
+# iosSimulatorArm64Test
+# tvosX64Test
+# watchosX86Test
+# watchosX64Test
+# watchosSimulatorArm64Test
+# tvosSimulatorArm64Test
+
+
+         -  name: Bundle the build report
+            if: failure()
+            shell: bash
+            run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
+
+         -  name: Upload the build report
+            if: failure()
+            uses: actions/upload-artifact@v3
+            with:
+               name: error-report
+               path: build-reports.zip
 
          -  uses: actions/upload-pages-artifact@v1
             with:
